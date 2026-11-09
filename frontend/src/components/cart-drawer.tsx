@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Minus, Plus } from "lucide-react";
-import { useSyncExternalStore } from "react";
-import { cartCount, cartSubtotal, useCart } from "@/lib/cart-store";
+import { useState, useSyncExternalStore } from "react";
+import { cartCount, cartSubtotal, useCart, type CartItem } from "@/lib/cart-store";
 import { formatMoney } from "@/lib/format";
 import { ArtImage } from "./art-image";
 import { Sheet } from "./sheet";
@@ -11,13 +11,44 @@ import { Sheet } from "./sheet";
 const subscribeNoop = () => () => {};
 
 export function CartDrawer() {
-  const { items, isOpen, close, remove, setQuantity } = useCart();
+  const { items, isOpen, close, remove, restore, setQuantity } = useCart();
   const hydrated = useSyncExternalStore(subscribeNoop, () => true, () => false);
+  const [removed, setRemoved] = useState<CartItem | null>(null);
   const list = hydrated ? items : [];
   const count = cartCount(list);
 
+  const removeWithUndo = (item: CartItem) => {
+    setRemoved(item);
+    remove(item.artworkId);
+  };
+
+  const undoBar = removed && (
+    <div className="mx-6 mt-4 flex items-center justify-between gap-4 rounded-[var(--r-sm)] bg-surface px-4 py-2" role="status">
+      <p className="t-small">Removed {removed.title}.</p>
+      <button
+        type="button"
+        className="link t-small min-h-11 font-medium"
+        onClick={() => {
+          restore(removed);
+          setRemoved(null);
+        }}
+      >
+        Undo
+      </button>
+    </div>
+  );
+
   return (
-    <Sheet open={isOpen} onClose={close} label="Cart" title={count ? `Cart (${count})` : "Cart"}>
+    <Sheet
+      open={isOpen}
+      onClose={() => {
+        setRemoved(null);
+        close();
+      }}
+      label="Cart"
+      title={count ? `Cart (${count})` : "Cart"}
+    >
+      {undoBar}
       {list.length === 0 ? (
         <div className="grid gap-4 px-6 py-10">
           <p className="t-lead">Your cart is empty.</p>
@@ -68,7 +99,7 @@ export function CartDrawer() {
                     ) : (
                       <p className="t-small text-muted">Original, one of one</p>
                     )}
-                    <button type="button" onClick={() => remove(i.artworkId)} className="link t-small min-h-11">
+                    <button type="button" onClick={() => removeWithUndo(i)} className="link t-small min-h-11">
                       Remove
                     </button>
                   </div>

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { preload } from "react-dom";
 import type { ImageAsset } from "@/lib/types";
 
 const srcset = (img: ImageAsset, ext: "avif" | "webp") =>
@@ -23,6 +24,17 @@ interface Props {
  */
 export function ArtImage({ image, sizes, fit = "contain", priority, className, imgClassName, style }: Props) {
   const fallback = `/art/${image.id}-${image.widths.at(-1)}.webp`;
+  if (priority) {
+    // A <link rel="preload"> in <head>, so the likely LCP image is requested with the HTML
+    // instead of waiting for layout.
+    preload(`/art/${image.id}-${image.widths.at(-1)}.avif`, {
+      as: "image",
+      type: "image/avif",
+      imageSrcSet: srcset(image, "avif"),
+      imageSizes: sizes,
+      fetchPriority: "high",
+    });
+  }
   return (
     <picture className={className} style={style}>
       <source type="image/avif" srcSet={srcset(image, "avif")} sizes={sizes} />
@@ -36,7 +48,7 @@ export function ArtImage({ image, sizes, fit = "contain", priority, className, i
         sizes={sizes}
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
-        decoding={priority ? "sync" : "async"}
+        decoding="async"
         className={imgClassName}
         style={{
           objectFit: fit,

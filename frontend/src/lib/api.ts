@@ -81,9 +81,21 @@ export async function getRelated(artwork: Artwork, limit = 4) {
 }
 
 /** Server-side filtering, sorting and paging, mirroring the FastAPI query params. */
-export async function searchArtworks(filters: ShopFilters): Promise<Paginated<Artwork>> {
+export async function searchArtworks(filters: ShopFilters & { q?: string }): Promise<Paginated<Artwork>> {
   const [all, cats, cols] = await Promise.all([getAllArtworks(), getCategories(), getCollections()]);
   let items = all;
+  if (filters.q) {
+    // Phase 2: PostgreSQL full-text search (GIN index) with pg_trgm for typos.
+    const words = filters.q.toLowerCase().split(/\s+/).filter(Boolean);
+    items = items.filter((a) => {
+      const hay = `${a.title} ${a.medium} ${a.description}`.toLowerCase();
+      return words.every((w) => hay.includes(w));
+    });
+  }
+  const category = filters.category ?? filters.medium;
+  if (category) {
+    filters = { ...filters, category };
+  }
   if (filters.category) {
     const cat = cats.find((c) => c.slug === filters.category);
     items = cat ? items.filter((a) => a.categoryId === cat.id) : [];

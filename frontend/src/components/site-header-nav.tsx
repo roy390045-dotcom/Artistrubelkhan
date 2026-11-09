@@ -92,7 +92,7 @@ export function HeaderNav({ categories, collections, arrivals }: Props) {
               <li key={w.href} className="flex items-center" onMouseEnter={() => (w.panel ? intendOpen(w.panel) : intendClose())}>
                 <Link
                   href={w.href}
-                  className="navlink text-[15px] font-medium whitespace-nowrap"
+                  className="navlink inline-flex min-h-11 items-center text-[15px] font-medium whitespace-nowrap"
                   aria-current={isCurrent(w.href) ? "page" : undefined}
                 >
                   {w.label}
@@ -100,7 +100,7 @@ export function HeaderNav({ categories, collections, arrivals }: Props) {
                 {w.panel && (
                   <button
                     type="button"
-                    className="ml-0.5 grid size-7 place-items-center rounded-[6px] text-muted hover:text-ink"
+                    className="ml-0.5 grid size-9 place-items-center rounded-[6px] text-muted hover:text-ink"
                     aria-expanded={panel === w.panel}
                     aria-controls={`panel-${w.panel}`}
                     aria-label={`Show ${w.label.toLowerCase()} menu`}

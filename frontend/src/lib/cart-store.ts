@@ -27,6 +27,8 @@ interface CartState {
   add: (a: Artwork) => void;
   setQuantity: (artworkId: number, quantity: number) => void;
   remove: (artworkId: number) => void;
+  /** Puts back a line removed a moment ago (the drawer's Undo). */
+  restore: (item: CartItem) => void;
   clear: () => void;
   open: () => void;
   close: () => void;
@@ -73,6 +75,8 @@ export const useCart = create<CartState>()(
           ),
         })),
       remove: (artworkId) => set((s) => ({ items: s.items.filter((i) => i.artworkId !== artworkId) })),
+      restore: (item) =>
+        set((s) => (s.items.some((i) => i.artworkId === item.artworkId) ? s : { items: [...s.items, item] })),
       clear: () => set({ items: [] }),
       open: () => set({ isOpen: true }),
       close: () => set({ isOpen: false }),

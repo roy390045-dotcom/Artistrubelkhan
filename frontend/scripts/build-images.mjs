@@ -60,6 +60,13 @@ for (const [id, { file }] of [...byId].sort()) {
     await base.clone().webp({ quality: 62, smartSubsample: true }).toFile(path.join(OUT, `${id}-${w}.webp`));
   }
 
+  // A JPEG for Open Graph share images (the OG renderer reads JPEG/PNG only).
+  await input
+    .clone()
+    .resize({ width: Math.min(1200, width), withoutEnlargement: true })
+    .jpeg({ quality: 78, mozjpeg: true })
+    .toFile(path.join(OUT, `${id}-og.jpg`));
+
   const tiny = await input.clone().resize(16).webp({ quality: 40 }).toBuffer();
   const { dominant } = await input.clone().stats();
   const hex = `#${[dominant.r, dominant.g, dominant.b].map((v) => v.toString(16).padStart(2, "0")).join("")}`;

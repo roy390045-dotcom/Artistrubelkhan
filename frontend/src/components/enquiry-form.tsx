@@ -27,7 +27,7 @@ export function EnquiryForm({ artwork = "", onSent }: { artwork?: string; onSent
   });
 
   const onSubmit = async (data: EnquiryInput) => {
-    const slow = window.setTimeout(() => setStatus({ kind: "sending", text: "Sending" }), 300);
+    const slow = window.setTimeout(() => setStatus({ kind: "sending", text: "Sending…" }), 300);
     try {
       const res = await fetch("/api/enquiry", {
         method: "POST",
@@ -65,7 +65,7 @@ export function EnquiryForm({ artwork = "", onSent }: { artwork?: string; onSent
       </div>
       <div className="field">
         <label htmlFor={`${uid}-email`}>Email</label>
-        <input className="input" type="email" autoComplete="email" {...f("email")} {...register("email")} />
+        <input className="input" type="email" autoComplete="email" spellCheck={false} {...f("email")} {...register("email")} />
         {errors.email && (
           <p className="field__error" id={`${uid}-email-error`}>
             {errors.email.message}
