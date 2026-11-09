@@ -51,8 +51,6 @@ export function ArtImage({ image, sizes, fit = "contain", priority, className, i
         decoding="async"
         className={imgClassName}
         style={{
-          // explicit ratio so the box is final before the image decodes (no layout shift)
-          aspectRatio: `${image.width} / ${image.height}`,
           objectFit: fit,
           backgroundColor: image.color,
           backgroundImage: `url("${image.blur}")`,

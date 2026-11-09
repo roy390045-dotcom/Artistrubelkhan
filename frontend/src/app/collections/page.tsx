@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArtImage } from "@/components/art-image";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getByCollection, getCollections } from "@/lib/api";
-import { BrushSwash } from "@/components/art/brush-swash";
 
 export const metadata: Metadata = {
   title: "Collections",
@@ -20,9 +19,8 @@ export default async function CollectionsPage() {
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Collections" }]} />
       <h1 className="t-h1 mt-6 mb-14">Collections by subject</h1>
       <ul className="grid gap-x-6 gap-y-16 md:grid-cols-3">
-        {withWorks.map((c, i) => (
-          <li key={c.slug} className="relative isolate">
-            <BrushSwash variant={(["rise", "wave", "fall"] as const)[i % 3]} bleed={14} />
+        {withWorks.map((c) => (
+          <li key={c.slug}>
             <Link href={`/collections/${c.slug}`} className="m-card">
               <div className="m-zoom aspect-[4/5] overflow-hidden bg-surface">
                 {c.works[0] && (

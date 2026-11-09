@@ -5,7 +5,6 @@ import { JsonLd } from "@/components/json-ld";
 import { getExhibitions } from "@/lib/api";
 import { formatDateRange } from "@/lib/format";
 import { site } from "@/lib/site";
-import { BrushSwash } from "@/components/art/brush-swash";
 
 export const metadata: Metadata = {
   title: "Exhibitions",
@@ -20,10 +19,9 @@ export default async function ExhibitionsPage() {
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Exhibitions" }]} />
       <h1 className="t-h1 mt-6 mb-16">Exhibitions</h1>
       <ul className="grid gap-20">
-        {exhibitions.map((e, i) => (
+        {exhibitions.map((e) => (
           <li key={e.slug} className="grid items-center gap-8 lg:grid-cols-12 lg:gap-6">
-            <div className="art-frame art-frame--center relative isolate aspect-[4/3] lg:col-span-6">
-              <BrushSwash variant={i % 2 ? "fall" : "wave"} bleed={12} />
+            <div className="art-frame art-frame--center aspect-[4/3] lg:col-span-6">
               <ArtImage image={e.image} sizes="(max-width: 1023px) 100vw, 50vw" />
             </div>
             <div className="grid content-start gap-3 lg:col-span-5 lg:col-start-8">
