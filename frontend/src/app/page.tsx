@@ -7,6 +7,7 @@ import { SectionHead } from "@/components/section-head";
 import { placePhotos } from "@/data/catalog";
 import { getArtwork, getByCollection, getCategories, getAllArtworks, getNewArrivals } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
+import { BrushEdges } from "@/components/art/brush-edges";
 
 /*
   Home. Kind: product (site-kind other). Deal: palette paper-grey-brass, type Besley / Albert Sans,
@@ -35,6 +36,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <BrushEdges />
       {/* 1. Hero: the work itself, whole, on the wall */}
       <section aria-labelledby="hero-h" className="wrap flex min-h-[calc(100svh-var(--nav))] flex-col pt-12 pb-10 max-sm:pt-8">
         <div className="grid gap-6 lg:grid-cols-12 lg:items-end">

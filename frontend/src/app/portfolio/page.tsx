@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArtImage } from "@/components/art-image";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getPortfolio } from "@/lib/api";
+import { BrushSwash } from "@/components/art/brush-swash";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -20,7 +21,7 @@ export default async function PortfolioPage() {
         <p className="t-lead text-muted md:col-span-4 md:col-start-9">Complete series, including works that are sold or not for sale.</p>
       </div>
       <ul className="grid gap-24">
-        {projects.map((p) => (
+        {projects.map((p, n) => (
           <li key={p.slug}>
             <Link href={`/portfolio/${p.slug}`} className="m-card grid gap-8 lg:grid-cols-12 lg:gap-6">
               <div className="grid content-start gap-3 lg:col-span-4">
@@ -29,7 +30,8 @@ export default async function PortfolioPage() {
                 <p className="text-muted">{p.description}</p>
                 <p className="t-small mt-2 text-muted">{p.images.length} works</p>
               </div>
-              <div className="grid grid-cols-2 gap-4 lg:col-span-8">
+              <div className="relative isolate grid grid-cols-2 gap-4 lg:col-span-8">
+                <BrushSwash variant={n % 2 ? "fall" : "rise"} bleed={8} />
                 {p.images.slice(0, 4).map((img) => (
                   <div key={img.id} className="m-zoom art-frame art-frame--center aspect-[4/3]">
                     <ArtImage image={img} sizes="(max-width: 1023px) 50vw, 33vw" />

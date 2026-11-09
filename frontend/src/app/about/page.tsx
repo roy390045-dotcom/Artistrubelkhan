@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { placePhotos } from "@/data/catalog";
 import { getExhibitions } from "@/lib/api";
 import { formatDateRange } from "@/lib/format";
+import { BrushSwash } from "@/components/art/brush-swash";
 
 /* ASSUMED COPY: replace with the artist's own biography, education and statement (see docs/HANDOFF.md). */
 
@@ -46,7 +47,8 @@ export default async function AboutPage() {
               </Link>
             </div>
           </div>
-          <div className="lg:col-span-5 lg:col-start-8">
+          <div className="relative isolate lg:col-span-5 lg:col-start-8">
+            <BrushSwash variant="fall" trigger="load" bleed={16} />
             <div className="aspect-[3/4] overflow-hidden bg-surface">
               <ArtImage
                 image={placePhotos.oldDhakaStreet}

@@ -5,6 +5,7 @@ import { Maximize2 } from "lucide-react";
 import type { ImageAsset } from "@/lib/types";
 import { ArtImage } from "../art-image";
 import { Sheet } from "../sheet";
+import { BrushSwash } from "../art/brush-swash";
 
 /**
  * The artwork, whole and large. A click opens it full screen; there a click toggles a
@@ -18,7 +19,8 @@ export function ArtworkViewer({ images, title, slug }: { images: ImageAsset[]; t
   const current = images[index];
 
   return (
-    <div className="grid gap-4">
+    <div className="relative isolate grid gap-4">
+      <BrushSwash variant="rise" trigger="load" bleedX={6} bleedY={16} />
       <button
         type="button"
         onClick={() => setOpen(true)}
