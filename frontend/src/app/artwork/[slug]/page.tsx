@@ -1,3 +1,5 @@
+import Loading from "./loading";
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -41,7 +43,7 @@ export async function generateMetadata(props: PageProps<"/artwork/[slug]">): Pro
   };
 }
 
-export default async function ArtworkPage(props: PageProps<"/artwork/[slug]">) {
+async function ArtworkPageContent(props: PageProps<"/artwork/[slug]">) {
   const { slug } = await props.params;
   const a = await getArtwork(slug);
   if (!a) notFound();
@@ -73,7 +75,7 @@ export default async function ArtworkPage(props: PageProps<"/artwork/[slug]">) {
         />
         <div className="mt-8 grid gap-12 lg:grid-cols-12 lg:gap-6">
           <div className="lg:col-span-7">
-            <ArtworkViewer images={a.images} title={a.title} />
+            <ArtworkViewer images={a.images} title={a.title} slug={a.slug} />
           </div>
 
           <div className="lg:col-span-4 lg:col-start-9">
@@ -194,5 +196,14 @@ export default async function ArtworkPage(props: PageProps<"/artwork/[slug]">) {
         }}
       />
     </>
+  );
+}
+
+/** Params are read inside Suspense so navigation shows the loading shell at once (instant navigation). */
+export default function ArtworkPage(props: PageProps<"/artwork/[slug]">) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ArtworkPageContent {...props} />
+    </Suspense>
   );
 }

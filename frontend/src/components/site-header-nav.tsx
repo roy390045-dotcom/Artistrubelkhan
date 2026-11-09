@@ -123,7 +123,7 @@ export function HeaderNav({ categories, collections, arrivals }: Props) {
           >
             <ShoppingBag size={20} strokeWidth={1.6} aria-hidden="true" />
             {count > 0 && (
-              <span className="absolute top-1.5 right-1 grid min-w-[18px] place-items-center rounded-full bg-ink px-1 text-[11px] leading-[18px] font-medium text-paper tabular">
+              <span key={count} className="badge-pop absolute top-1.5 right-1 grid min-w-[18px] place-items-center rounded-full bg-ink px-1 text-[11px] leading-[18px] font-medium text-paper tabular">
                 {count}
               </span>
             )}

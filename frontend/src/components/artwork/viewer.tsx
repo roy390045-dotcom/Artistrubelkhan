@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ViewTransition } from "react";
 import { Maximize2 } from "lucide-react";
 import type { ImageAsset } from "@/lib/types";
 import { ArtImage } from "../art-image";
@@ -10,7 +10,7 @@ import { Sheet } from "../sheet";
  * The artwork, whole and large. A click opens it full screen; there a click toggles a
  * 2x zoom that follows the pointer (phones pinch-zoom natively).
  */
-export function ArtworkViewer({ images, title }: { images: ImageAsset[]; title: string }) {
+export function ArtworkViewer({ images, title, slug }: { images: ImageAsset[]; title: string; slug: string }) {
   const [index, setIndex] = useState(0);
   const [open, setOpen] = useState(false);
   const [zoom, setZoom] = useState(false);
@@ -25,9 +25,11 @@ export function ArtworkViewer({ images, title }: { images: ImageAsset[]; title: 
         className="group relative block aspect-[6/5] w-full cursor-zoom-in"
         aria-label={`View ${title} full screen`}
       >
-        <div className="art-frame art-frame--center absolute inset-0">
-          <ArtImage image={current} sizes="(max-width: 1023px) 100vw, 60vw" priority />
-        </div>
+        <ViewTransition name={`art-${slug}`} share="morph" default="none">
+          <div className="art-frame art-frame--center absolute inset-0">
+            <ArtImage image={current} sizes="(max-width: 1023px) 100vw, 60vw" priority />
+          </div>
+        </ViewTransition>
         <span className="absolute right-3 bottom-3 grid size-10 place-items-center rounded-full bg-bg/90 opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100">
           <Maximize2 size={16} aria-hidden="true" />
         </span>

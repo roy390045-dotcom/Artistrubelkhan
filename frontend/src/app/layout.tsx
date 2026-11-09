@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Albert_Sans, Besley } from "next/font/google";
 import { CartDrawer } from "@/components/cart-drawer";
 import { EnquiryDock } from "@/components/enquiry-dock";
+import { Toaster } from "@/components/toaster";
 import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
         <CartDrawer />
         <EnquiryDock />
+        <Toaster />
         <JsonLd
           data={[
             {

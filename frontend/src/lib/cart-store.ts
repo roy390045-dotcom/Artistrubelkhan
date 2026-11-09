@@ -24,7 +24,7 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
-  add: (a: Artwork) => void;
+  add: (a: Artwork, opts?: { open?: boolean }) => void;
   setQuantity: (artworkId: number, quantity: number) => void;
   remove: (artworkId: number) => void;
   /** Puts back a line removed a moment ago (the drawer's Undo). */
@@ -39,20 +39,20 @@ export const useCart = create<CartState>()(
     (set) => ({
       items: [],
       isOpen: false,
-      add: (a) =>
+      add: (a, opts) =>
         set((s) => {
           const max = a.editionType === "original" ? 1 : Math.max(1, a.stockQty);
           const existing = s.items.find((i) => i.artworkId === a.id);
           if (existing) {
             return {
-              isOpen: true,
+              isOpen: opts?.open ?? true,
               items: s.items.map((i) =>
                 i.artworkId === a.id ? { ...i, quantity: Math.min(max, i.quantity + 1) } : i,
               ),
             };
           }
           return {
-            isOpen: true,
+            isOpen: opts?.open ?? true,
             items: [
               ...s.items,
               {

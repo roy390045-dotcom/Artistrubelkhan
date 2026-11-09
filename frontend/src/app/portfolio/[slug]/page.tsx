@@ -1,3 +1,5 @@
+import Loading from "./loading";
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArtImage } from "@/components/art-image";
@@ -15,7 +17,7 @@ export async function generateMetadata(props: PageProps<"/portfolio/[slug]">): P
   return { title: `${p.title}, ${p.year}`, description: p.description, alternates: { canonical: `/portfolio/${p.slug}` } };
 }
 
-export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">) {
+async function ProjectPageContent(props: PageProps<"/portfolio/[slug]">) {
   const { slug } = await props.params;
   const p = await getPortfolioProject(slug);
   if (!p) notFound();
@@ -36,5 +38,14 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
         ))}
       </ul>
     </div>
+  );
+}
+
+/** Params are read inside Suspense so navigation shows the loading shell at once (instant navigation). */
+export default function ProjectPage(props: PageProps<"/portfolio/[slug]">) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ProjectPageContent {...props} />
+    </Suspense>
   );
 }

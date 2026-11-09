@@ -28,7 +28,9 @@ export default async function HomePage() {
   ]);
   const featured = await getArtwork("rock-in-the-ganges");
   const cheapest = Math.min(...all.filter((a) => a.status === "available").map((a) => a.price.amount));
-  const newArrivals = arrivals.filter((a) => a.id !== hero?.id).slice(0, 4);
+  // Each painting appears once per page: shared-element (view transition) names must be unique.
+  const inOldDhaka = new Set(oldDhaka.map((a) => a.id));
+  const newArrivals = arrivals.filter((a) => a.id !== hero?.id && !inOldDhaka.has(a.id)).slice(0, 4);
   const mediumCovers = categories.map((c) => ({ ...c, cover: all.find((a) => a.categoryId === c.id && a.id !== hero?.id) ?? null, count: all.filter((a) => a.categoryId === c.id).length }));
 
   return (
@@ -61,7 +63,7 @@ export default async function HomePage() {
         </div>
         {hero && (
           <Link href={`/artwork/${hero.slug}`} className="relative mt-8 block min-h-[300px] flex-1" aria-label={`${hero.title}, ${formatMoney(hero.price)}`}>
-            <div className="art-frame art-frame--center enter-object absolute inset-0">
+            <div className="art-frame art-frame--center hero-hang absolute inset-0">
               <ArtImage image={hero.images[0]} sizes="(max-width: 1023px) 100vw, 1280px" priority />
             </div>
           </Link>
@@ -77,9 +79,9 @@ export default async function HomePage() {
           link={{ href: "/shop?sort=newest", label: "See all new paintings" }}
         />
         <ul className="grid grid-cols-2 gap-x-6 gap-y-12 max-sm:gap-x-3 max-sm:gap-y-8 lg:grid-cols-4">
-          {newArrivals.map((a) => (
+          {newArrivals.map((a, i) => (
             <li key={a.id}>
-              <ArtworkCard artwork={a} />
+              <ArtworkCard artwork={a} index={i} />
             </li>
           ))}
         </ul>
@@ -123,8 +125,8 @@ export default async function HomePage() {
       <section aria-labelledby="medium-h" className="section wrap">
         <SectionHead id="medium-h" title="Paintings by medium." aside="Six ways to start looking." />
         <ul className="grid grid-cols-2 gap-x-6 gap-y-10 max-sm:gap-x-3 md:grid-cols-3">
-          {mediumCovers.map((c) => (
-            <li key={c.slug}>
+          {mediumCovers.map((c, i) => (
+            <li key={c.slug} className="rise" style={{ "--i": i % 3 } as React.CSSProperties}>
               <Link href={`/shop/${c.slug}`} className="m-card">
                 <div className="m-zoom aspect-[4/3] overflow-hidden bg-surface">
                   {c.cover && (
@@ -160,9 +162,9 @@ export default async function HomePage() {
             link={{ href: "/collections/old-dhaka", label: "See the Old Dhaka collection" }}
           />
           <ul className="grid grid-cols-2 gap-x-6 gap-y-12 max-sm:gap-x-3 max-sm:gap-y-8 lg:grid-cols-4">
-            {oldDhaka.map((a) => (
+            {oldDhaka.map((a, i) => (
               <li key={a.id}>
-                <ArtworkCard artwork={a} />
+                <ArtworkCard artwork={a} index={i} />
               </li>
             ))}
           </ul>
@@ -223,7 +225,7 @@ export default async function HomePage() {
                 image={placePhotos.buriganga}
                 fit="cover"
                 sizes="(max-width: 1023px) 100vw, 50vw"
-                className="block h-full w-full"
+                className="reveal block h-full w-full"
                 imgClassName="h-full w-full"
               />
             </div>
@@ -237,7 +239,7 @@ export default async function HomePage() {
           image={placePhotos.boatDetail}
           fit="cover"
           sizes="100vw"
-          className="absolute inset-0 block h-full w-full"
+          className="reveal absolute inset-0 block h-full w-full"
           imgClassName="h-full w-full"
         />
         <div className="wrap relative flex min-h-[80svh] items-end py-16">

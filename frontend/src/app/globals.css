@@ -67,6 +67,7 @@
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --m-in: 150ms;
   --m-out: 120ms;
   --m-press: 90ms;
@@ -792,6 +793,222 @@ html:has(dialog[open]) {
   animation: object-in 900ms var(--ease-enter) both;
 }
 
+/* ---------- hero: the painting is uncovered by a wipe from its bottom edge ---------- */
+
+@keyframes wipe-up {
+  from {
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(24px) scale(1.04);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+.hero-hang {
+  animation: wipe-up 1000ms var(--ease-drawer) both;
+  animation-delay: calc(260ms + var(--i, 0) * 110ms);
+}
+
+/* ---------- scroll-driven reveals (pure CSS, compositor only; static where unsupported) ---------- */
+
+@supports (animation-timeline: view()) {
+  @keyframes reveal-img {
+    from {
+      clip-path: inset(16% 0 0 0);
+      transform: scale(1.08);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+      transform: none;
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .reveal {
+    animation: reveal-img linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 38%;
+  }
+  .rise {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry calc(var(--i, 0) * 6%) entry calc(70% + var(--i, 0) * 6%);
+  }
+}
+
+/* ---------- artwork cards: a mat appears and a view label slides in ---------- */
+
+.card-mat {
+  position: relative;
+  padding: 18px;
+  background: transparent;
+  transition: background-color 300ms var(--ease);
+}
+.card-cta {
+  position: absolute;
+  left: 18px;
+  bottom: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--p-ink);
+  color: var(--p-paper);
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 200ms var(--ease),
+    transform 300ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .m-card:hover .card-mat {
+    background: var(--paper);
+  }
+  .m-card:hover .card-cta,
+  .m-card:focus-visible .card-cta {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* status pills: colour says the state at a glance */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.pill--sold {
+  background: color-mix(in oklab, var(--p-danger) 12%, transparent);
+  color: var(--p-danger);
+}
+.pill--available {
+  background: color-mix(in oklab, var(--p-success) 12%, transparent);
+  color: var(--p-success);
+}
+.pill--sale {
+  background: var(--p-accent);
+  color: var(--p-ink);
+}
+.pill--edition {
+  background: color-mix(in oklab, var(--p-ink) 9%, transparent);
+  color: var(--ink);
+}
+.pill--muted {
+  background: color-mix(in oklab, var(--ink) 8%, transparent);
+  color: var(--muted);
+}
+
+/* ---------- view transition: the painting morphs from card to page ---------- */
+
+::view-transition-group(.morph) {
+  animation-duration: 460ms;
+  animation-timing-function: var(--ease-io);
+}
+::view-transition-image-pair(.morph) {
+  isolation: isolate;
+}
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(.morph) {
+  display: none;
+}
+
+/* ---------- cart feedback ---------- */
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.35);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.badge-pop {
+  animation: pop 360ms var(--ease);
+}
+
+/* cart lines enter from the right and collapse away when removed */
+.cart-line {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: none;
+  transition:
+    grid-template-rows 260ms var(--ease),
+    opacity 200ms var(--ease),
+    transform 260ms var(--ease);
+}
+@starting-style {
+  .cart-line {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+.cart-line[data-leaving] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateX(-24px);
+}
+.cart-line > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* toast: rises from the bottom edge and leaves the same way */
+.toast {
+  transition:
+    transform 420ms var(--ease-drawer),
+    opacity 300ms var(--ease);
+}
+@starting-style {
+  .toast {
+    transform: translateY(110%);
+    opacity: 0;
+  }
+}
+.toast[data-leaving] {
+  transform: translateY(110%);
+  opacity: 0;
+  transition-duration: 220ms;
+}
+
+.notice-in {
+  transition:
+    opacity 220ms var(--ease),
+    transform 260ms var(--ease);
+}
+@starting-style {
+  .notice-in {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+
 /* ---------- moment: picture-develops (film look) ---------- */
 
 .moment-develops {
@@ -973,7 +1190,18 @@ html:has(dialog[open]) {
   }
   .sheet .sheet__panel,
   .sheet:not([open]) .sheet__panel,
-  .nav-panel {
+  .nav-panel,
+  .hero-hang,
+  .reveal,
+  .rise,
+  .cart-line,
+  .toast {
     transform: none !important;
+    clip-path: none !important;
+  }
+  .reveal,
+  .rise {
+    animation: none !important;
+    opacity: 1 !important;
   }
 }

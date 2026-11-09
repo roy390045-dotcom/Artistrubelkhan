@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock } from "lucide-react";
@@ -22,7 +22,7 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
   const hydrated = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const [status, setStatus] = useState<Status>({ kind: "idle", text: "" });
   // One idempotency key per checkout attempt: a double click or a retry never creates two orders.
-  const idemKey = useRef<string>("");
+  const [idemKey, setIdemKey] = useState<string | null>(null);
 
   const {
     register,
@@ -72,12 +72,13 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
   }
 
   const onSubmit = async (form: CheckoutInput) => {
-    if (!idemKey.current) idemKey.current = crypto.randomUUID();
+    const key = idemKey ?? crypto.randomUUID();
+    if (!idemKey) setIdemKey(key);
     setStatus({ kind: "sending", text: "Checking your order…" });
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Idempotency-Key": idemKey.current },
+        headers: { "Content-Type": "application/json", "Idempotency-Key": key },
         body: JSON.stringify({ form, lines: items.map((i) => ({ artworkId: i.artworkId, quantity: i.quantity })) }),
       });
       const data = await res.json().catch(() => ({}));
@@ -102,7 +103,7 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
     "aria-invalid": errors[name] ? true : undefined,
     "aria-describedby": errors[name] ? `${uid}-${name}-error` : undefined,
   });
-  const Err = ({ name }: { name: keyof CheckoutInput }) =>
+  const err = (name: keyof CheckoutInput) =>
     errors[name] ? (
       <p className="field__error" id={`${uid}-${name}-error`}>
         {String(errors[name]?.message)}
@@ -117,7 +118,7 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
           <div className="field">
             <label htmlFor={`${uid}-email`}>Email for the receipt and delivery updates</label>
             <input className="input" type="email" autoComplete="email" spellCheck={false} {...fieldProps("email")} {...register("email")} />
-            <Err name="email" />
+            {err("email")}
           </div>
         </fieldset>
 
@@ -140,31 +141,31 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
             <div className="field">
               <label htmlFor={`${uid}-countryName`}>Country name</label>
               <input className="input" autoComplete="country-name" {...fieldProps("countryName")} {...register("countryName")} />
-              <Err name="countryName" />
+              {err("countryName")}
             </div>
           )}
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="field">
               <label htmlFor={`${uid}-name`}>Recipient&apos;s name</label>
               <input className="input" autoComplete="name" {...fieldProps("name")} {...register("name")} />
-              <Err name="name" />
+              {err("name")}
             </div>
             <div className="field">
               <label htmlFor={`${uid}-phone`}>{country === "BD" ? "Mobile number" : "Phone with country code"}</label>
               <input className="input" type="tel" autoComplete="tel" inputMode="tel" {...fieldProps("phone")} {...register("phone")} />
-              <Err name="phone" />
+              {err("phone")}
             </div>
           </div>
           <div className="field">
             <label htmlFor={`${uid}-addressLine`}>House, road and area</label>
             <input className="input" autoComplete="address-line1" {...fieldProps("addressLine")} {...register("addressLine")} />
-            <Err name="addressLine" />
+            {err("addressLine")}
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="field">
               <label htmlFor={`${uid}-area`}>{country === "BD" ? "Thana or upazila" : "State or region"}</label>
               <input className="input" autoComplete="address-level3" {...fieldProps("area")} {...register("area")} />
-              <Err name="area" />
+              {err("area")}
             </div>
             {country === "BD" ? (
               <div className="field">
@@ -183,13 +184,13 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
                     </option>
                   ))}
                 </select>
-                <Err name="district" />
+                {err("district")}
               </div>
             ) : (
               <div className="field">
                 <label htmlFor={`${uid}-city`}>City</label>
                 <input className="input" autoComplete="address-level2" {...fieldProps("city")} {...register("city")} />
-                <Err name="city" />
+                {err("city")}
               </div>
             )}
           </div>
@@ -217,7 +218,7 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
                 <span className="tabular">{formatMoney(z.rate)}</span>
               </label>
             ))}
-          <Err name="zone" />
+          {err("zone")}
         </fieldset>
 
         <fieldset className="grid gap-3">
@@ -290,7 +291,7 @@ export function CheckoutForm({ zones }: { zones: ShippingZone[] }) {
               .
             </span>
           </label>
-          <Err name="acceptTerms" />
+          {err("acceptTerms")}
           <button type="submit" className="btn btn--primary btn--block" disabled={status.kind === "sending"}>
             {payment === "stripe" ? "Pay by card" : "Pay"} {formatMoney(total)}
           </button>

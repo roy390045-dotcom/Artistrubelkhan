@@ -1,3 +1,4 @@
+import Loading from "./loading";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -23,7 +24,7 @@ export async function generateMetadata(props: PageProps<"/shop/[category]">): Pr
   };
 }
 
-export default async function CategoryPage(props: PageProps<"/shop/[category]">) {
+async function CategoryPageContent(props: PageProps<"/shop/[category]">) {
   const { category } = await props.params;
   const cat = (await getCategories()).find((c) => c.slug === category);
   if (!cat) notFound();
@@ -60,5 +61,14 @@ async function CategoryBody({ slug, searchParams }: { slug: string; searchParams
       />
       <ShopResults filters={filters} basePath={`/shop/${slug}`} />
     </>
+  );
+}
+
+/** Params are read inside Suspense so navigation shows the loading shell at once (instant navigation). */
+export default function CategoryPage(props: PageProps<"/shop/[category]">) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <CategoryPageContent {...props} />
+    </Suspense>
   );
 }

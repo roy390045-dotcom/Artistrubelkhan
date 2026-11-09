@@ -1,3 +1,4 @@
+import Loading from "./loading";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -22,7 +23,7 @@ export async function generateMetadata(props: PageProps<"/collections/[slug]">):
   };
 }
 
-export default async function CollectionPage(props: PageProps<"/collections/[slug]">) {
+async function CollectionPageContent(props: PageProps<"/collections/[slug]">) {
   const { slug } = await props.params;
   const col = (await getCollections()).find((c) => c.slug === slug);
   if (!col) notFound();
@@ -59,5 +60,14 @@ async function CollectionBody({ slug, searchParams }: { slug: string; searchPara
       />
       <ShopResults filters={filters} basePath={`/collections/${slug}`} />
     </>
+  );
+}
+
+/** Params are read inside Suspense so navigation shows the loading shell at once (instant navigation). */
+export default function CollectionPage(props: PageProps<"/collections/[slug]">) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <CollectionPageContent {...props} />
+    </Suspense>
   );
 }
